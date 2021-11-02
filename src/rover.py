@@ -30,9 +30,9 @@ class Rover:
 
     def move(self) -> None:
         new_position = self._position + self._direction
-        if not self.valid_position(new_position):
+        if not self._valid_position(new_position):
             raise PositionOutOfBoundsException(new_position)
         self._position = new_position
 
-    def valid_position(self, new_position: np.array) -> bool:
+    def _valid_position(self, new_position: np.array) -> bool:
         return 0 <= new_position[0] <= self._max_x and 0 <= new_position[1] <= self._max_y
