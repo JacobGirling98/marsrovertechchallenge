@@ -36,3 +36,9 @@ class Rover:
 
     def _valid_position(self, new_position: np.array) -> bool:
         return 0 <= new_position[0] <= self._max_x and 0 <= new_position[1] <= self._max_y
+
+    def position(self):
+        return self._position
+
+    def direction(self):
+        return self._direction
