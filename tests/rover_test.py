@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from _pytest.fixtures import fixture
 
-from src.exceptions import PositionOutOfBoundsException
+from src.exceptions.position_out_of_bounds_exception import PositionOutOfBoundsException
 from src.rover import Rover
 
 
@@ -18,17 +18,18 @@ def rover():
 
 def test_create_rover():
     rover = Rover([1, 2, "N"], [5, 6])
+
     assert (rover._position == np.array([1, 2])).all()
     assert (rover._direction == np.array([0, 1])).all()
     assert rover._max_x == 5
     assert rover._max_y == 6
 
 
-def test_set_starting_direction(rover):
-    direction1 = rover._set_initial_direction("N")
-    direction2 = rover._set_initial_direction("E")
-    direction3 = rover._set_initial_direction("S")
-    direction4 = rover._set_initial_direction("W")
+def test_set_initial_direction(rover):
+    direction1: np.array = rover._set_initial_direction("N")
+    direction2: np.array = rover._set_initial_direction("E")
+    direction3: np.array = rover._set_initial_direction("S")
+    direction4: np.array = rover._set_initial_direction("W")
 
     assert (direction1 == np.array([0, 1])).all()
     assert (direction2 == np.array([1, 0])).all()
@@ -37,8 +38,8 @@ def test_set_starting_direction(rover):
 
 
 def test_rotation_matrix(rover):
-    anticlockwise_matrix = rover._rotation_matrix(np.pi / 2)
-    clockwise_matrix = rover._rotation_matrix(-np.pi / 2)
+    anticlockwise_matrix: np.array = rover._rotation_matrix(np.pi / 2)
+    clockwise_matrix: np.array = rover._rotation_matrix(-np.pi / 2)
 
     assert (clockwise_matrix == np.array([[0, 1],
                                           [-1, 0]])).any()
@@ -108,3 +109,17 @@ def test_valid_position(rover):
     assert not rover._valid_position(np.array([7, 1]))
     assert not rover._valid_position(np.array([1, 7]))
     assert not rover._valid_position(np.array([7, 7]))
+
+
+def test_bearing(rover):
+    rover.change_direction("L")
+    assert rover.bearing() == "W"
+
+    rover.change_direction("L")
+    assert rover.bearing() == "S"
+
+    rover.change_direction("L")
+    assert rover.bearing() == "E"
+
+    rover.change_direction("L")
+    assert rover.bearing() == "N"

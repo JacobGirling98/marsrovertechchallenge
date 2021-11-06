@@ -1,6 +1,6 @@
 import numpy as np
 
-from src.exceptions import PositionOutOfBoundsException
+from src.exceptions.position_out_of_bounds_exception import PositionOutOfBoundsException
 
 
 class Rover:
@@ -42,3 +42,12 @@ class Rover:
 
     def direction(self):
         return self._direction
+
+    def bearing(self):
+        directions = {
+            (0, 1): "N",
+            (1, 0): "E",
+            (0, -1): "S",
+            (-1, 0): "W"
+        }
+        return directions[tuple(self.direction())]

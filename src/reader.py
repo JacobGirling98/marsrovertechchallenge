@@ -1,3 +1,7 @@
+from src.dataclasses.processed_input import ProcessedInput
+from src.dataclasses.rover_instructions import RoverInstructions
+
+
 class Reader:
 
     def __init__(self, input_file_path):
@@ -12,21 +16,21 @@ class Reader:
         return [int(x) for x in received_data[0].split()]
 
     def _get_position(self, input_position: str) -> list:
-        position = input_position.split()
+        position: list = input_position.split()
         position[0], position[1] = int(position[0]), int(position[1])
         return position
 
     def _get_instructions(self, received_data: list) -> list:
-        instructions = []
+        instructions: list[RoverInstructions] = []
         counter = 1
         while counter < len(received_data):
-            position = self._get_position()
+            position: list = self._get_position(received_data[counter])
             counter += 1
-            movement = list(received_data[counter])
+            movement: list = list(received_data[counter])
             counter += 1
-            instructions.append([position, movement])
+            instructions.append(RoverInstructions(position, movement))
         return instructions
 
     def process_input(self):
-        data = self._read_input()
-        return self._top_grid(data), self._get_instructions(data)
+        data: list = self._read_input()
+        return ProcessedInput(self._top_grid(data), self._get_instructions(data))
