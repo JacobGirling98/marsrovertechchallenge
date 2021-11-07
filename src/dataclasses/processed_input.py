@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 
-from src.dataclasses.rover_instructions import RoverInstructions
+from src.dataclasses.coordinates import Coordinates
+from src.dataclasses.rover_details import RoverDetails
 
 
 @dataclass
 class ProcessedInput:
-    grid_size: list[int]
-    rover_details: list[RoverInstructions]
+    grid_size: Coordinates
+    rover_details: list[RoverDetails]

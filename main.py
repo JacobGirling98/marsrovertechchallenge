@@ -1,10 +1,13 @@
 from src.controller import Controller
+from src.reader import Reader
 
 
 def mars_rover_challenge():
-    controller = Controller("input.txt")
-    rovers = controller.process_rovers()
-    [print(res) for res in controller.format_output(rovers)]
+    reader = Reader("input.txt")
+    controller = Controller(reader)
+    controller.setup()
+    controller.process_rovers()
+    [print(res) for res in controller.format_output()]
 
 
 if __name__ == '__main__':
