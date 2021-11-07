@@ -7,9 +7,9 @@ from src.dataclasses.rover_setup import RoverSetup
 class Rover:
 
     def __init__(self, initial_position: RoverSetup, _id: int):
-        self._position = np.array([initial_position.position.x, initial_position.position.y])
-        self._direction = self._set_initial_direction(initial_position.direction)
-        self._id = _id
+        self._position: np.array = np.array([initial_position.position.x, initial_position.position.y])
+        self._direction: np.array = self._set_initial_direction(initial_position.direction)
+        self.rover_id: int = _id
 
     def _set_initial_direction(self, direction: str) -> np.array:
         directions = {
@@ -20,10 +20,6 @@ class Rover:
         }
         return directions[direction]
 
-    def _rotation_matrix(self, angle: float) -> np.array:
-        return np.array([[np.cos(angle), -np.sin(angle)],
-                         [np.sin(angle), np.cos(angle)]])
-
     def change_direction(self, direction: str) -> np.array:
         angle = np.pi / 2 if direction == "L" else -np.pi / 2
         self._direction = np.matmul(self._rotation_matrix(angle), self._direction).astype(int)
@@ -33,6 +29,10 @@ class Rover:
         # if not self._valid_position(new_position):
         #     raise PositionOutOfBoundsException(new_position)
         self._position = new_position
+
+    def _rotation_matrix(self, angle: float) -> np.array:
+        return np.array([[np.cos(angle), -np.sin(angle)],
+                         [np.sin(angle), np.cos(angle)]])
 
     # def _valid_position(self, new_position: np.array) -> bool:
     #     return 0 <= new_position[0] <= self._max_x and 0 <= new_position[1] <= self._max_y
@@ -55,5 +55,5 @@ class Rover:
     def __eq__(self, o: object) -> bool:
         if isinstance(o, Rover):
             return (self._position == o._position).any() and (
-                    self._direction == o._direction).any() and self._id == o._id
+                    self._direction == o._direction).any() and self.rover_id == o.rover_id
         return False

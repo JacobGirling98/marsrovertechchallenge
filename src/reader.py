@@ -6,28 +6,25 @@ from src.dataclasses.rover_setup import RoverSetup
 
 class Reader:
 
-    def __init__(self, input_file_path):
-        self.input_file_path = input_file_path
+    def __init__(self, input_file_path: str):
+        self.input_file_path: str = input_file_path
+
+    def process_input(self) -> ProcessedInput:
+        data: list[str] = self._read_input()
+        return ProcessedInput(self._top_grid(data), self._get_rover_details(data))
 
     def _read_input(self) -> list[str]:
         with open(self.input_file_path, "r") as file:
-            data: list = file.read().splitlines()
+            data: list[str] = file.read().splitlines()
         return data
 
     def _top_grid(self, received_data: list) -> Coordinates:
-        grid_dims = received_data[0].split()
-        return Coordinates(int(grid_dims[0]), int(grid_dims[1]))
+        top_grid: list[str] = received_data[0].split()
+        return Coordinates(int(top_grid[0]), int(top_grid[1]))
 
-    def _get_position(self, input_position: str) -> Coordinates:
-        position: list = input_position.split()
-        return Coordinates(int(position[0]), int(position[1]))
-
-    def _get_direction(self, input_position: str) -> str:
-        return input_position.split()[2]
-
-    def _get_rover_details(self, received_data: list) -> list[RoverDetails]:
+    def _get_rover_details(self, received_data: list[str]) -> list[RoverDetails]:
         instructions: list[RoverDetails] = []
-        counter = 1
+        counter: int = 1
         while counter < len(received_data):
             position: Coordinates = self._get_position(received_data[counter])
             direction: str = self._get_direction(received_data[counter])
@@ -38,6 +35,9 @@ class Reader:
             instructions.append(RoverDetails(rover_setup, movement))
         return instructions
 
-    def process_input(self) -> ProcessedInput:
-        data: list[str] = self._read_input()
-        return ProcessedInput(self._top_grid(data), self._get_rover_details(data))
+    def _get_position(self, input_position: str) -> Coordinates:
+        position: list[str] = input_position.split()
+        return Coordinates(int(position[0]), int(position[1]))
+
+    def _get_direction(self, input_position: str) -> str:
+        return input_position.split()[2]

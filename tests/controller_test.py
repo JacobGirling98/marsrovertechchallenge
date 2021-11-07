@@ -41,7 +41,7 @@ def controller(reader):
 def test_control_rover(controller):
     expected = Rover(RoverSetup(Coordinates(1, 2), "N"), 0)
 
-    actual = controller.control_rover(0, ["L", "M", "L", "M", "L", "M", "L", "M", "M"])
+    actual = controller._control_rover(0, ["L", "M", "L", "M", "L", "M", "L", "M", "M"])
 
     assert actual == expected
 
@@ -72,7 +72,7 @@ def test_correct_output(controller):
 
 
 def test_instantiate_grid(controller):
-    controller.instantiate_grid(Coordinates(5, 6))
+    controller._instantiate_grid(Coordinates(5, 6))
 
     assert controller.grid == [[0, 0, 0, 0, 0, 0],
                                [0, 0, 0, 0, 0, 0],
@@ -91,7 +91,7 @@ def test_instantiate_rovers(controller):
     ]
     expected_rovers = {i: Rover(rover_setups[i], i) for i in range(3)}
 
-    controller.instantiate_rovers(rover_setups)
+    controller._instantiate_rovers(rover_setups)
 
     assert controller.rovers == expected_rovers
 
@@ -102,7 +102,7 @@ def test_add_rovers_to_grid(controller):
     rover_c = Rover(RoverSetup(Coordinates(3, 3), "N"), 2)
     rovers = {0: rover_a, 1: rover_b, 2: rover_c}
 
-    controller.add_rovers_to_grid(rovers)
+    controller._add_rovers_to_grid(rovers)
 
     assert controller.grid == [[0, 0, 0, 0, 0],
                                [0, 0, 0, 0, 0],
@@ -113,11 +113,11 @@ def test_add_rovers_to_grid(controller):
 
 
 def test_transform_coords(controller):
-    controller.instantiate_grid(Coordinates(5, 6))
+    controller._instantiate_grid(Coordinates(5, 6))
 
-    assert controller.transform_coords(5) == 1
-    assert controller.transform_coords(1) == 5
-    assert controller.transform_coords(0) == 6
+    assert controller._transform_coords(5) == 1
+    assert controller._transform_coords(1) == 5
+    assert controller._transform_coords(0) == 6
 
 
 def test_find_rover(controller):
@@ -134,10 +134,10 @@ def test_find_rover(controller):
                        [0, 0, 0, 0, 0]]
     controller.dims = Coordinates(5, 6)
 
-    assert controller.find_rover(0) == Coordinates(2, 2)
-    assert controller.find_rover(1) == Coordinates(1, 1)
-    assert controller.find_rover(2) == Coordinates(3, 3)
-    assert controller.find_rover(3) == Coordinates(3, 4)
+    assert controller._find_rover(0) == Coordinates(2, 2)
+    assert controller._find_rover(1) == Coordinates(1, 1)
+    assert controller._find_rover(2) == Coordinates(3, 3)
+    assert controller._find_rover(3) == Coordinates(3, 4)
 
 
 def test_update_grid(controller):
@@ -153,10 +153,10 @@ def test_update_grid(controller):
                        [0, rover_b, 0, 0, 0],
                        [0, 0, 0, 0, 0]]
 
-    controller.update_grid(0)
-    controller.update_grid(1)
-    controller.update_grid(2)
-    controller.update_grid(3)
+    controller._update_grid(0)
+    controller._update_grid(1)
+    controller._update_grid(2)
+    controller._update_grid(3)
 
     assert controller.grid == [[0, 0, 0, rover_d, 0],
                                [0, 0, 0, 0, 0],

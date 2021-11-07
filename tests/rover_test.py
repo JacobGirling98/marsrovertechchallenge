@@ -23,7 +23,7 @@ def test_create_rover():
 
     assert (rover._position == np.array([2, 2])).all()
     assert (rover._direction == np.array([0, 1])).all()
-    assert rover._id == 0
+    assert rover.rover_id == 0
 
 
 def test_set_initial_direction(rover):
