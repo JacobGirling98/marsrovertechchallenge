@@ -82,24 +82,32 @@ def test_change_direction(rover):
     assert rover.direction() == Coordinates(0, 1)
 
 
-def test_move(rover):
-    rover.move()
-    assert (rover._position == np.array([1, 3])).all()
-    assert rover.position() == Coordinates(1, 3)
+def test_look_ahead(rover):
+    rover.look_ahead()
+    assert rover.look_ahead() == Coordinates(1, 3)
+    assert (rover._next_position == np.array([1, 3])).all()
 
     rover._direction = np.array([1, 0])
-    rover.move()
-    assert (rover._position == np.array([2, 3])).all()
-    assert rover.position() == Coordinates(2, 3)
+    assert rover.look_ahead() == Coordinates(2, 2)
+    assert (rover._next_position == np.array([2, 2])).all()
 
     rover._direction = np.array([0, -1])
-    rover.move()
-    assert (rover._position == np.array([2, 2])).all()
-    assert rover.position() == Coordinates(2, 2)
+    rover.look_ahead()
+    assert rover.look_ahead() == Coordinates(1, 1)
+    assert (rover._next_position == np.array([1, 1])).all()
 
     rover._direction = np.array([-1, 0])
+    rover.look_ahead()
+    assert rover.look_ahead() == Coordinates(0, 2)
+    assert (rover._next_position == np.array([0, 2])).all()
+
+
+def test_move(rover):
+    rover._next_position = np.array([1, 2])
+
     rover.move()
-    assert (rover._position == np.array([1, 2])).all()
+
+    assert (rover._position == np.array([1, 2])).any()
     assert rover.position() == Coordinates(1, 2)
 
 

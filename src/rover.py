@@ -6,6 +6,8 @@ from src.dataclasses.rover_setup import RoverSetup
 
 class Rover:
 
+    _next_position: np.array
+
     def __init__(self, initial_position: RoverSetup, _id: int):
         self._position: np.array = np.array([initial_position.position.x, initial_position.position.y])
         self._direction: np.array = self._set_initial_direction(initial_position.direction)
@@ -25,10 +27,13 @@ class Rover:
         self._direction = np.matmul(self._rotation_matrix(angle), self._direction).astype(int)
 
     def move(self) -> None:
-        new_position = self._position + self._direction
         # if not self._valid_position(new_position):
         #     raise PositionOutOfBoundsException(new_position)
-        self._position = new_position
+        self._position = self._next_position
+
+    def look_ahead(self) -> Coordinates:
+        self._next_position = self._position + self._direction
+        return Coordinates(self._next_position[0], self._next_position[1])
 
     def _rotation_matrix(self, angle: float) -> np.array:
         return np.array([[np.cos(angle), -np.sin(angle)],

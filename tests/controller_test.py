@@ -1,10 +1,14 @@
 from _pytest.fixtures import fixture
+from _pytest.python_api import raises
+import numpy as np
 
 from src.controller import Controller
 from src.dataclasses.coordinates import Coordinates
 from src.dataclasses.processed_input import ProcessedInput
 from src.dataclasses.rover_details import RoverDetails
 from src.dataclasses.rover_setup import RoverSetup
+from src.exceptions.position_blocked_exception import PositionBlockedException
+from src.exceptions.position_out_of_bounds_exception import PositionOutOfBoundsException
 from src.reader import Reader
 from src.rover import Rover
 
@@ -44,6 +48,30 @@ def test_control_rover(controller):
     actual = controller._control_rover(0, ["L", "M", "L", "M", "L", "M", "L", "M", "M"])
 
     assert actual == expected
+
+
+def test_move_rover(controller):
+    expected = Rover(RoverSetup(Coordinates(1, 2), "N"), 0)
+
+    controller._move_rover(0)
+
+    assert controller.rovers[0] == expected
+
+
+def test_move_rover_to_blocked_position_raises_exception(controller):
+    controller.rovers[0] = Rover(RoverSetup(Coordinates(1, 2), "E"), 0)
+
+    with raises(PositionBlockedException) as e:
+        assert controller._move_rover(0)
+    assert str(e.value) == "Rover 0 blocked from moving to [2, 2] by Rover 1"
+
+
+def test_move_rover_off_grid_raises_exception(controller):
+    controller.rovers[0] = Rover(RoverSetup(Coordinates(0, 0), "S"), 0)
+
+    with raises(PositionOutOfBoundsException) as e:
+        assert controller._move_rover(0)
+    assert str(e.value) == "Rover 0 tried to move to out of bounds position: x = 0, y = -1"
 
 
 def test_process_rovers(controller):
@@ -191,3 +219,35 @@ def test_setup(controller, reader, mocker):
         ["M"],
         ["R", 'M']
     ]
+
+
+def test_check_matching_positions(controller):
+    controller.check_matching_positions(0, Coordinates(1, 1))
+
+
+def test_check_matching_position_raises_position_blocked_exception(controller):
+    with raises(PositionBlockedException) as e:
+        assert controller.check_matching_positions(0, Coordinates(2, 2))
+    assert str(e.value) == "Rover 0 blocked from moving to [2, 2] by Rover 1"
+
+
+def test_check_coords_in_grid(controller):
+    controller.check_coords_in_grid(0, Coordinates(1, 1))
+
+
+def test_check_coords_in_grid_raises_position_out_of_bounds_exception(controller):
+    with raises(PositionOutOfBoundsException) as e:
+        assert controller.check_coords_in_grid(0, Coordinates(0, -1))
+    assert str(e.value) == "Rover 0 tried to move to out of bounds position: x = 0, y = -1"
+
+    with raises(PositionOutOfBoundsException) as e:
+        assert controller.check_coords_in_grid(1, Coordinates(-1, 0))
+    assert str(e.value) == "Rover 1 tried to move to out of bounds position: x = -1, y = 0"
+
+    with raises(PositionOutOfBoundsException) as e:
+        assert controller.check_coords_in_grid(2, Coordinates(6, 0))
+    assert str(e.value) == "Rover 2 tried to move to out of bounds position: x = 6, y = 0"
+
+    with raises(PositionOutOfBoundsException) as e:
+        assert controller.check_coords_in_grid(3, Coordinates(0, 7))
+    assert str(e.value) == "Rover 3 tried to move to out of bounds position: x = 0, y = 7"

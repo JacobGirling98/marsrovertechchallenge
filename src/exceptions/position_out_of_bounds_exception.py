@@ -1,6 +1,9 @@
+from src.dataclasses.coordinates import Coordinates
+
+
 class PositionOutOfBoundsException(Exception):
 
-    def __init__(self, coordinates):
-        self.x = coordinates[0]
-        self.y = coordinates[1]
-        super().__init__(f"Tried to move to out of bounds position: x={self.x}, y={self.y}")
+    def __init__(self, _id: int, coordinates: Coordinates):
+        self._id: int = _id
+        self.coordinates: Coordinates = coordinates
+        super().__init__(f"Rover {self._id} tried to move to out of bounds position: x = {self.coordinates.x}, y = {self.coordinates.y}")

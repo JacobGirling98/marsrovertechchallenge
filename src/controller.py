@@ -3,6 +3,8 @@ from copy import deepcopy
 from src.dataclasses.coordinates import Coordinates
 from src.dataclasses.processed_input import ProcessedInput
 from src.dataclasses.rover_setup import RoverSetup
+from src.exceptions.position_blocked_exception import PositionBlockedException
+from src.exceptions.position_out_of_bounds_exception import PositionOutOfBoundsException
 from src.reader import Reader
 from src.rover import Rover
 
@@ -45,9 +47,25 @@ class Controller:
             if command == "L" or command == "R":
                 self.rovers[_id].change_direction(command)
             elif command == "M":
-                self.rovers[_id].move()
-                self._update_grid(_id)
+                self._move_rover(_id)
         return self.rovers[_id]
+
+    def _move_rover(self, _id: int):
+        new_coords: Coordinates = self.rovers[_id].look_ahead()
+        self.check_matching_positions(_id, new_coords)
+        self.check_coords_in_grid(_id, new_coords)
+        self.rovers[_id].move()
+        self._update_grid(_id)
+
+    def check_matching_positions(self, _id: int, position: Coordinates) -> None:
+        res: list[Rover] = list(filter(lambda x: x.rover_id != _id and x.position() == position, self.rovers.values()))
+        if len(res) > 0:
+            raise PositionBlockedException(_id, res[0].rover_id, position)
+
+    def check_coords_in_grid(self, _id: int, position: Coordinates) -> None:
+        if 0 <= position.x <= self.dims.x and 0 <= position.y <= self.dims.y:
+            return
+        raise PositionOutOfBoundsException(_id, position)
 
     def _update_grid(self, _id: int) -> None:
         rover: Rover = self.rovers[_id]
