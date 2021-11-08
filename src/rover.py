@@ -7,9 +7,9 @@ from src.dataclasses.rover_setup import RoverSetup
 class Rover:
     _next_position: np.array
 
-    def __init__(self, initial_position: RoverSetup, _id: int):
-        self._position: np.array = np.array([initial_position.position.x, initial_position.position.y])
-        self._direction: np.array = self._set_initial_direction(initial_position.direction)
+    def __init__(self, rover_setup: RoverSetup, _id: int):
+        self._position: np.array = np.array([rover_setup.position.x, rover_setup.position.y])
+        self._direction: np.array = self._set_initial_direction(rover_setup.direction)
         self.rover_id: int = _id
 
     def _set_initial_direction(self, direction: str) -> np.array:
