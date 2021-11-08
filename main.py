@@ -5,8 +5,7 @@ from src.reader import Reader
 def mars_rover_challenge():
     reader = Reader("input.txt")
     controller = Controller(reader)
-    controller.setup()
-    controller.process_rovers()
+    controller.control_rovers()
     [print(res) for res in controller.format_output()]
 
 

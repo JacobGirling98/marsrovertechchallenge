@@ -5,7 +5,6 @@ from src.dataclasses.rover_setup import RoverSetup
 
 
 class Rover:
-
     _next_position: np.array
 
     def __init__(self, initial_position: RoverSetup, _id: int):
@@ -23,12 +22,10 @@ class Rover:
         return directions[direction]
 
     def change_direction(self, direction: str) -> np.array:
-        angle = np.pi / 2 if direction == "L" else -np.pi / 2
+        angle: float = np.pi / 2 if direction == "L" else -np.pi / 2
         self._direction = np.matmul(self._rotation_matrix(angle), self._direction).astype(int)
 
     def move(self) -> None:
-        # if not self._valid_position(new_position):
-        #     raise PositionOutOfBoundsException(new_position)
         self._position = self._next_position
 
     def look_ahead(self) -> Coordinates:
@@ -38,9 +35,6 @@ class Rover:
     def _rotation_matrix(self, angle: float) -> np.array:
         return np.array([[np.cos(angle), -np.sin(angle)],
                          [np.sin(angle), np.cos(angle)]])
-
-    # def _valid_position(self, new_position: np.array) -> bool:
-    #     return 0 <= new_position[0] <= self._max_x and 0 <= new_position[1] <= self._max_y
 
     def position(self) -> Coordinates:
         return Coordinates(self._position[0], self._position[1])

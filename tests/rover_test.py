@@ -19,6 +19,7 @@ def rover():
 def test_create_rover():
     position = Coordinates(2, 2)
     rover_setup = RoverSetup(position, "N")
+
     rover = Rover(rover_setup, 0)
 
     assert (rover._position == np.array([2, 2])).all()
@@ -109,27 +110,6 @@ def test_move(rover):
 
     assert (rover._position == np.array([1, 2])).any()
     assert rover.position() == Coordinates(1, 2)
-
-
-# def test_move_out_of_bounds(rover, mocker):
-#     mocker.patch.object(rover, "_valid_position")
-#     rover._valid_position.return_value = False
-#
-#     with pytest.raises(PositionOutOfBoundsException) as e:
-#         assert rover.move()
-#     assert str(e.value) == "Tried to move to out of bounds position: x=1, y=3"
-#
-#
-# def test_valid_position(rover):
-#     assert rover._valid_position(np.array([1, 1]))
-#     assert rover._valid_position(np.array([0, 0]))
-#     assert rover._valid_position(np.array([5, 6]))
-#     assert not rover._valid_position(np.array([-1, 1]))
-#     assert not rover._valid_position(np.array([1, -1]))
-#     assert not rover._valid_position(np.array([-1, -1]))
-#     assert not rover._valid_position(np.array([7, 1]))
-#     assert not rover._valid_position(np.array([1, 7]))
-#     assert not rover._valid_position(np.array([7, 7]))
 
 
 def test_bearing(rover):

@@ -1,6 +1,5 @@
 from _pytest.fixtures import fixture
 from _pytest.python_api import raises
-import numpy as np
 
 from src.controller import Controller
 from src.dataclasses.coordinates import Coordinates
@@ -27,12 +26,6 @@ def controller(reader):
         Rover(RoverSetup(Coordinates(3, 3), "N"), 2)
     ]
     controller.rovers = {i: rovers[i] for i in range(3)}
-    controller.grid = [[0, 0, 0, 0, 0],
-                       [0, 0, 0, 0, 0],
-                       [0, 0, 0, rovers[2], 0],
-                       [0, 0, rovers[1], 0, 0],
-                       [0, rovers[0], 0, 0, 0],
-                       [0, 0, 0, 0, 0]]
     controller.dims = Coordinates(5, 6)
     controller.commands = [
         ["L", "M"],
@@ -74,8 +67,8 @@ def test_move_rover_off_grid_raises_exception(controller):
     assert str(e.value) == "Rover 0 tried to move to out of bounds position: x = 0, y = -1"
 
 
-def test_process_rovers(controller):
-    controller.process_rovers()
+def test_control_rovers(controller):
+    controller.control_rovers()
 
     expected: dict[int, Rover] = {
         0: Rover(RoverSetup(Coordinates(0, 1), "W"), 0),
@@ -86,7 +79,7 @@ def test_process_rovers(controller):
     assert controller.rovers == expected
 
 
-def test_correct_output(controller):
+def test_format_output(controller):
     expected = ["1 3 N", "5 1 E"]
     rovers = [
         Rover(RoverSetup(Coordinates(1, 3), "N"), 0),
@@ -97,18 +90,6 @@ def test_correct_output(controller):
     actual = controller.format_output()
 
     assert actual == expected
-
-
-def test_instantiate_grid(controller):
-    controller._instantiate_grid(Coordinates(5, 6))
-
-    assert controller.grid == [[0, 0, 0, 0, 0, 0],
-                               [0, 0, 0, 0, 0, 0],
-                               [0, 0, 0, 0, 0, 0],
-                               [0, 0, 0, 0, 0, 0],
-                               [0, 0, 0, 0, 0, 0],
-                               [0, 0, 0, 0, 0, 0],
-                               [0, 0, 0, 0, 0, 0]]
 
 
 def test_instantiate_rovers(controller):
@@ -124,77 +105,7 @@ def test_instantiate_rovers(controller):
     assert controller.rovers == expected_rovers
 
 
-def test_add_rovers_to_grid(controller):
-    rover_a = Rover(RoverSetup(Coordinates(1, 1), "N"), 0)
-    rover_b = Rover(RoverSetup(Coordinates(2, 2), "N"), 1)
-    rover_c = Rover(RoverSetup(Coordinates(3, 3), "N"), 2)
-    rovers = {0: rover_a, 1: rover_b, 2: rover_c}
-
-    controller._add_rovers_to_grid(rovers)
-
-    assert controller.grid == [[0, 0, 0, 0, 0],
-                               [0, 0, 0, 0, 0],
-                               [0, 0, 0, rover_c, 0],
-                               [0, 0, rover_b, 0, 0],
-                               [0, rover_a, 0, 0, 0],
-                               [0, 0, 0, 0, 0]]
-
-
-def test_transform_coords(controller):
-    controller._instantiate_grid(Coordinates(5, 6))
-
-    assert controller._transform_coords(5) == 1
-    assert controller._transform_coords(1) == 5
-    assert controller._transform_coords(0) == 6
-
-
-def test_find_rover(controller):
-    rover_a = Rover(RoverSetup(Coordinates(1, 2), "N"), 0)
-    rover_b = Rover(RoverSetup(Coordinates(1, 0), "N"), 1)
-    rover_c = Rover(RoverSetup(Coordinates(4, 3), "N"), 2)
-    rover_d = Rover(RoverSetup(Coordinates(3, 5), "N"), 3)
-    controller.rovers = [rover_a, rover_b, rover_c, rover_d]
-    controller.grid = [[0, 0, 0, 0, 0],
-                       [0, 0, 0, rover_d, 0],
-                       [0, 0, 0, rover_c, 0],
-                       [0, 0, rover_a, 0, 0],
-                       [0, rover_b, 0, 0, 0],
-                       [0, 0, 0, 0, 0]]
-    controller.dims = Coordinates(5, 6)
-
-    assert controller._find_rover(0) == Coordinates(2, 2)
-    assert controller._find_rover(1) == Coordinates(1, 1)
-    assert controller._find_rover(2) == Coordinates(3, 3)
-    assert controller._find_rover(3) == Coordinates(3, 4)
-
-
-def test_update_grid(controller):
-    rover_a = Rover(RoverSetup(Coordinates(1, 2), "N"), 0)
-    rover_b = Rover(RoverSetup(Coordinates(1, 0), "N"), 1)
-    rover_c = Rover(RoverSetup(Coordinates(4, 3), "N"), 2)
-    rover_d = Rover(RoverSetup(Coordinates(3, 5), "N"), 3)
-    controller.rovers = [rover_a, rover_b, rover_c, rover_d]
-    controller.grid = [[0, 0, 0, 0, 0],
-                       [0, 0, 0, rover_d, 0],
-                       [0, 0, 0, rover_c, 0],
-                       [0, 0, rover_a, 0, 0],
-                       [0, rover_b, 0, 0, 0],
-                       [0, 0, 0, 0, 0]]
-
-    controller._update_grid(0)
-    controller._update_grid(1)
-    controller._update_grid(2)
-    controller._update_grid(3)
-
-    assert controller.grid == [[0, 0, 0, rover_d, 0],
-                               [0, 0, 0, 0, 0],
-                               [0, 0, 0, 0, rover_c],
-                               [0, rover_a, 0, 0, 0],
-                               [0, 0, 0, 0, 0],
-                               [0, rover_b, 0, 0, 0]]
-
-
-def test_setup(controller, reader, mocker):
+def test_create_controller(controller, reader, mocker):
     rover_details = [
         RoverDetails(RoverSetup(Coordinates(1, 1), "N"), ["L", "M"]),
         RoverDetails(RoverSetup(Coordinates(2, 2), "N"), ["M"]),
@@ -205,49 +116,44 @@ def test_setup(controller, reader, mocker):
     reader.process_input.return_value = mocked_input
     expected_rovers = {i: Rover(rover_details[i].rover_setup, i) for i in range(len(rover_details))}
 
-    controller.setup()
+    actual = Controller(reader)
 
-    assert controller.rovers == expected_rovers
-    assert controller.grid == [[0, 0, 0, 0, 0, 0],
-                               [0, 0, 0, 0, 0, 0],
-                               [0, 0, 0, expected_rovers[2], 0, 0],
-                               [0, 0, expected_rovers[1], 0, 0, 0],
-                               [0, expected_rovers[0], 0, 0, 0, 0],
-                               [0, 0, 0, 0, 0, 0]]
-    assert controller.commands == [
+    assert actual.rovers == expected_rovers
+    assert actual.commands == [
         ["L", "M"],
         ["M"],
         ["R", 'M']
     ]
+    assert actual.dims == Coordinates(5, 5)
 
 
 def test_check_matching_positions(controller):
-    controller.check_matching_positions(0, Coordinates(1, 1))
+    controller._check_matching_positions(0, Coordinates(1, 1))
 
 
 def test_check_matching_position_raises_position_blocked_exception(controller):
     with raises(PositionBlockedException) as e:
-        assert controller.check_matching_positions(0, Coordinates(2, 2))
+        assert controller._check_matching_positions(0, Coordinates(2, 2))
     assert str(e.value) == "Rover 0 blocked from moving to [2, 2] by Rover 1"
 
 
 def test_check_coords_in_grid(controller):
-    controller.check_coords_in_grid(0, Coordinates(1, 1))
+    controller._check_coords_in_grid(0, Coordinates(1, 1))
 
 
 def test_check_coords_in_grid_raises_position_out_of_bounds_exception(controller):
     with raises(PositionOutOfBoundsException) as e:
-        assert controller.check_coords_in_grid(0, Coordinates(0, -1))
+        assert controller._check_coords_in_grid(0, Coordinates(0, -1))
     assert str(e.value) == "Rover 0 tried to move to out of bounds position: x = 0, y = -1"
 
     with raises(PositionOutOfBoundsException) as e:
-        assert controller.check_coords_in_grid(1, Coordinates(-1, 0))
+        assert controller._check_coords_in_grid(1, Coordinates(-1, 0))
     assert str(e.value) == "Rover 1 tried to move to out of bounds position: x = -1, y = 0"
 
     with raises(PositionOutOfBoundsException) as e:
-        assert controller.check_coords_in_grid(2, Coordinates(6, 0))
+        assert controller._check_coords_in_grid(2, Coordinates(6, 0))
     assert str(e.value) == "Rover 2 tried to move to out of bounds position: x = 6, y = 0"
 
     with raises(PositionOutOfBoundsException) as e:
-        assert controller.check_coords_in_grid(3, Coordinates(0, 7))
+        assert controller._check_coords_in_grid(3, Coordinates(0, 7))
     assert str(e.value) == "Rover 3 tried to move to out of bounds position: x = 0, y = 7"
